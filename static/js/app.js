@@ -155,7 +155,15 @@
   });
 
   function renderInfo(v) {
-    if (v.thumbnail) { els.thumb.src = v.thumbnail; } else { els.thumb.removeAttribute("src"); }
+    const thumbBox = els.thumb.parentElement;
+    if (v.thumbnail) {
+      els.thumb.src = v.thumbnail;
+      thumbBox.style.display = "";
+    } else {
+      els.thumb.removeAttribute("src");
+      thumbBox.style.display = "none";
+    }
+    els.thumb.onerror = () => { thumbBox.style.display = "none"; };
     els.thumb.alt = v.title ? "Thumbnail for " + v.title : "";
     els.title.textContent = v.title;
     els.meta.textContent = [v.uploader, v.duration ? fmtTime(v.duration) : "", fmtViews(v.view_count)]
