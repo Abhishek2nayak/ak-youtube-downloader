@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block schema %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+ {"@type":"ListItem","position":1,"name":"Home","item":"{{ site_url }}/"},
+ {"@type":"ListItem","position":2,"name":"YouTube Video Downloader","item":"{{ canonical }}"}]}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> YouTube Video Downloader</nav>
+    <h1>YouTube Video Downloader</h1>
+    <p class="lede">Save any public YouTube video as an MP4 file — 360p through 4K, with the
+      original audio merged in. Paste the link below to begin.</p>
+    {% include "_tool.html" %}
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow prose">
+    <h2>Which resolution should you choose?</h2>
+    <p>Higher resolution means a bigger file and a longer wait. These are typical sizes for a
+      ten-minute video, though the real size depends on how much movement is in the footage.</p>
+
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Option</th><th>Resolution</th><th>Rough size (10 min)</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr><td>360p</td><td>640 × 360</td><td>~40 MB</td><td>Slow connections, talking-head videos</td></tr>
+          <tr><td>480p</td><td>854 × 480</td><td>~70 MB</td><td>Phone viewing, saving data</td></tr>
+          <tr><td>720p HD</td><td>1280 × 720</td><td>~150 MB</td><td>The everyday balance</td></tr>
+          <tr><td>1080p Full HD</td><td>1920 × 1080</td><td>~250 MB</td><td>Laptops and TVs</td></tr>
+          <tr><td>1440p 2K</td><td>2560 × 1440</td><td>~600 MB</td><td>Large monitors</td></tr>
+          <tr><td>2160p 4K</td><td>3840 × 2160</td><td>~1.5 GB</td><td>4K screens, editing footage</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Only the resolutions that the uploader actually published appear in the dropdown. If a
+      channel uploaded in 720p, no tool anywhere can produce a genuine 1080p file from it —
+      anything claiming otherwise is upscaling and re-encoding, which makes the video look worse.</p>
+
+    <h2>What happens after you press Download</h2>
+    <ol>
+      <li>The video stream and the audio stream are fetched separately, which is how YouTube
+        serves high-resolution content.</li>
+      <li>FFmpeg merges them into a single MP4 without re-encoding, so there is no quality loss
+        and no watermark.</li>
+      <li>The title and channel are written into the file's metadata.</li>
+      <li>The finished file is sent to your browser and saved to your device automatically.</li>
+    </ol>
+
+    <h2>Supported links</h2>
+    <ul class="ticks">
+      <li><code>youtube.com/watch?v=…</code> — standard video pages</li>
+      <li><code>youtu.be/…</code> — short share links</li>
+      <li><code>youtube.com/shorts/…</code> — see the <a href="/youtube-shorts-downloader">Shorts downloader</a></li>
+      <li><code>music.youtube.com/…</code> — best paired with <a href="/youtube-to-mp3">MP3 conversion</a></li>
+      <li><code>youtube.com/live/…</code> — after the stream has ended</li>
+    </ul>
+
+    <h2>Only need the sound?</h2>
+    <p>Switch the format dropdown to MP3, or use the dedicated
+      <a href="/youtube-to-mp3">YouTube to MP3 converter</a>, which adds cover art and song tags
+      to the file.</p>
+
+    <p class="note">Download videos you own, videos published under a licence that allows reuse,
+      or videos you have permission to save. See the <a href="/disclaimer">disclaimer</a> and
+      <a href="/terms-and-conditions">terms</a>.</p>
+  </div>
+</section>
+{% endblock %}

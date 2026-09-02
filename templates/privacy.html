@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> Privacy Policy</nav>
+    <h1>Privacy Policy</h1>
+    <p class="lede">This policy explains what AK YouTube Downloader collects, why, and how long
+      anything is kept. It is written to be read, not to be skimmed past.</p>
+    <p class="updated">Last updated: {{ year }}</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow prose legal">
+    <h2>1. The short version</h2>
+    <p>There are no accounts, so we hold no names, emails or passwords unless you send them to us
+      yourself through the contact form. Files you download are deleted from the server after they
+      are delivered. We do not sell data, because we do not gather data worth selling.</p>
+
+    <h2>2. Information we process</h2>
+    <h3>2.1 Links you paste</h3>
+    <p>A YouTube URL you submit is used to fetch that video's public details and to prepare your
+      file. It is held in memory while the job runs. We do not keep a permanent record linking a
+      URL to a visitor.</p>
+    <h3>2.2 Server logs</h3>
+    <p>Like any web server, ours may record the IP address, browser user agent, requested page and
+      timestamp of a request. These logs exist for security, abuse prevention and debugging, and
+      are rotated regularly.</p>
+    <h3>2.3 Contact form</h3>
+    <p>If you write to us, we store the name, email address, subject and message you provide so we
+      can reply. You can ask us to delete that message at any time.</p>
+    <h3>2.4 Cookies</h3>
+    <p>The site does not set advertising or tracking cookies. Your browser may store small
+      preferences locally (for example the last format you chose); that stays on your device and
+      is never transmitted to us.</p>
+
+    <h2>3. Files you download</h2>
+    <p>Your file is created on the server, sent to your browser, and then removed. We do not build
+      a library of downloaded media, we do not scan the contents of files, and we do not share
+      them with anyone.</p>
+
+    <h2>4. Third parties</h2>
+    <p>To prepare a download, our server contacts YouTube's public servers. That request comes
+      from our server, not from your browser, so YouTube does not receive your IP address as part
+      of the download. Thumbnails shown in the preview are loaded directly from YouTube's image
+      servers by your browser.</p>
+    <p>If this site is hosted with a cloud provider or sits behind a CDN, that provider processes
+      traffic on our behalf under its own security and logging practices.</p>
+
+    <h2>5. Analytics and advertising</h2>
+    <p>If we later add analytics or advertising, this page will be updated before it goes live,
+      and any provider used will be named here. We will not introduce systems that build personal
+      profiles of visitors.</p>
+
+    <h2>6. Children</h2>
+    <p>The service is not directed at children under 13, and we do not knowingly collect personal
+      information from them.</p>
+
+    <h2>7. Your rights</h2>
+    <p>Depending on where you live, you may have the right to request access to, correction of, or
+      deletion of personal data we hold about you, and to object to processing. Since we hold
+      almost nothing, such requests are usually simple to satisfy. Write to
+      <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+
+    <h2>8. Security</h2>
+    <p>Traffic is served over HTTPS in production. No system is perfectly secure, but because we
+      do not store accounts or payment details there is very little for an attacker to obtain.</p>
+
+    <h2>9. Changes</h2>
+    <p>When this policy changes, the date at the top of the page changes with it. Continuing to
+      use the site after an update means you accept the revised policy.</p>
+
+    <h2>10. Contact</h2>
+    <p>Questions about privacy go to <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+      or through the <a href="/contact">contact page</a>.</p>
+  </div>
+</section>
+{% endblock %}

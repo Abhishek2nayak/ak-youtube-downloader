@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> Terms &amp; Conditions</nav>
+    <h1>Terms &amp; Conditions</h1>
+    <p class="lede">These terms govern your use of AK YouTube Downloader. By using the site you
+      accept them. If you do not, please do not use the service.</p>
+    <p class="updated">Last updated: {{ year }}</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow prose legal">
+    <h2>1. The service</h2>
+    <p>AK YouTube Downloader is a free tool that retrieves publicly available media from YouTube
+      at your request and converts it into an MP4 or MP3 file for you to save. We provide the tool;
+      you choose what to point it at.</p>
+
+    <h2>2. Acceptable use</h2>
+    <p>You agree to use the service only for lawful purposes. In particular, you agree not to:</p>
+    <ul class="ticks">
+      <li>download or redistribute copyrighted material without the rights holder's permission;</li>
+      <li>use the service to infringe any intellectual property, privacy or publicity right;</li>
+      <li>attempt to access private, paid, members-only or otherwise restricted content;</li>
+      <li>run automated scripts, scrapers or bulk jobs against the service;</li>
+      <li>overload, probe, reverse engineer or otherwise interfere with the infrastructure;</li>
+      <li>resell access to the service or present it as your own product.</li>
+    </ul>
+
+    <h2>3. Your responsibility</h2>
+    <p>You are solely responsible for the content you choose to download and for how you use it.
+      Downloading material may breach YouTube's Terms of Service and copyright law in your
+      jurisdiction. We do not review, approve or monitor what individual visitors download, and we
+      cannot give you legal advice about your situation.</p>
+
+    <h2>4. Intellectual property</h2>
+    <p>The name, design, text and code of this website belong to their respective owners. Media
+      retrieved through the service belongs to the people who created it — using our tool does not
+      transfer any rights in that media to you or to us.</p>
+    <p>The service is built on independent open source projects, including yt-dlp and FFmpeg,
+      which remain the property of their authors and are used under their own licences.</p>
+
+    <h2>5. Availability</h2>
+    <p>The service is provided free of charge and on an "as is" basis. We do not promise that it
+      will be available at any particular time, that every video will work, or that YouTube will
+      not change something tomorrow that temporarily breaks it. Features may change or be removed
+      without notice.</p>
+
+    <h2>6. Limitation of liability</h2>
+    <p>To the fullest extent permitted by law, we are not liable for any direct, indirect,
+      incidental or consequential loss arising from your use of the service, including loss of
+      data, loss of profit, device damage or legal claims brought against you by a third party.
+      Nothing in these terms excludes liability that cannot lawfully be excluded.</p>
+
+    <h2>7. Indemnity</h2>
+    <p>You agree to indemnify and hold us harmless against any claim, demand or cost arising from
+      your misuse of the service or your breach of these terms.</p>
+
+    <h2>8. Termination</h2>
+    <p>We may restrict or block access to the service, at our discretion and without notice, if we
+      believe it is being abused.</p>
+
+    <h2>9. Governing law</h2>
+    <p>These terms are governed by the laws of the jurisdiction in which the operator of this
+      website is established, without regard to conflict-of-law rules.</p>
+
+    <h2>10. Changes to these terms</h2>
+    <p>We may update these terms; the date above will change when we do. Continued use after an
+      update constitutes acceptance.</p>
+
+    <h2>11. Contact</h2>
+    <p>Questions about these terms: <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+
+    <p class="note">See also the <a href="/privacy-policy">privacy policy</a> and the
+      <a href="/disclaimer">disclaimer</a>.</p>
+  </div>
+</section>
+{% endblock %}

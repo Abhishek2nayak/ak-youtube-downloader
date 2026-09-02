@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block schema %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ContactPage","url":"{{ canonical }}",
+ "mainEntity":{"@type":"Organization","name":"{{ site_name }}","email":"{{ contact_email }}"}}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> Contact Us</nav>
+    <h1>Contact Us</h1>
+    <p class="lede">Bug reports, feature requests, copyright notices and general questions all
+      reach the same inbox. We read everything and normally reply within two working days.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow">
+    <div class="contact-grid">
+      <form class="contact-form card" id="contactForm">
+        <div class="opt">
+          <label for="cName">Your name</label>
+          <input id="cName" name="name" type="text" required maxlength="120" placeholder="Jane Doe">
+        </div>
+        <div class="opt">
+          <label for="cEmail">Email address</label>
+          <input id="cEmail" name="email" type="email" required maxlength="160" placeholder="you@example.com">
+        </div>
+        <div class="opt">
+          <label for="cSubject">Subject</label>
+          <select id="cSubject" name="subject">
+            <option>A download did not work</option>
+            <option>Feature request</option>
+            <option>Copyright or rights holder enquiry</option>
+            <option>Advertising or partnership</option>
+            <option>Something else</option>
+          </select>
+        </div>
+        <div class="opt">
+          <label for="cMessage">Message</label>
+          <textarea id="cMessage" name="message" rows="6" required maxlength="4000"
+            placeholder="If a download failed, paste the video link and the exact message you saw."></textarea>
+        </div>
+        <button class="btn btn-lg" type="submit" id="cSend">Send message</button>
+        <p class="form-note" id="cNote" hidden></p>
+      </form>
+
+      <aside class="contact-side prose">
+        <h2>Email</h2>
+        <p><a href="mailto:{{ contact_email }}">{{ contact_email }}</a></p>
+
+        <h2>Before you write</h2>
+        <p>Most problems are covered already:</p>
+        <ul class="ticks">
+          <li><a href="/faq">FAQ</a> — formats, quality, limits, privacy</li>
+          <li><a href="/how-to-download#problems">Fixing a failed download</a></li>
+          <li><a href="/how-to-download#mobile">Saving files on Android and iPhone</a></li>
+        </ul>
+
+        <h2>Rights holders</h2>
+        <p>We do not host or store video files, so there is no copy for us to take down. If you
+          believe the service is being used against your content, write to us with the details and
+          we will respond.</p>
+
+        <h2>Response time</h2>
+        <p>Usually one to two working days. Messages sent at weekends are answered on Monday.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

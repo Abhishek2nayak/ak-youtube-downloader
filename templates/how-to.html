@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block schema %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"HowTo",
+ "name":"How to download a YouTube video",
+ "description":"Copy a YouTube link, paste it into AK YouTube Downloader, choose MP4 or MP3, and save the file to your device.",
+ "totalTime":"PT1M",
+ "step":[
+  {"@type":"HowToStep","name":"Copy the video link","text":"Open the video on YouTube, tap Share and then Copy link, or copy the address from your browser's URL bar."},
+  {"@type":"HowToStep","name":"Paste the link","text":"Paste the link into the box on AK YouTube Downloader and press Get video.","url":"{{ site_url }}/youtube-downloader"},
+  {"@type":"HowToStep","name":"Choose a format","text":"Pick MP4 video with a resolution, or MP3 audio with a bitrate."},
+  {"@type":"HowToStep","name":"Download","text":"Press Download. The file is prepared and then saved to your device automatically."}]}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> How to Download</nav>
+    <h1>How to Download YouTube Videos</h1>
+    <p class="lede">The same four steps work on every device. Below the basics you will find
+      specific instructions for Windows, Mac, Android and iPhone, plus fixes for the errors
+      people hit most often.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow prose">
+    <nav class="toc" aria-label="On this page">
+      <strong>On this page</strong>
+      <a href="#basics">The four steps</a>
+      <a href="#desktop">Windows and Mac</a>
+      <a href="#mobile">Android and iPhone</a>
+      <a href="#mp3">Saving as MP3</a>
+      <a href="#shorts">Downloading Shorts</a>
+      <a href="#problems">When a download fails</a>
+    </nav>
+
+    <h2 id="basics">The four steps</h2>
+    <ol class="big-steps">
+      <li><strong>Copy the link.</strong> On the YouTube app, tap <em>Share → Copy link</em>.
+        In a browser, copy the address bar. Both <code>youtube.com/watch?v=…</code> and
+        <code>youtu.be/…</code> work.</li>
+      <li><strong>Paste it into the box</strong> on the
+        <a href="/youtube-downloader">downloader page</a> and press <em>Get video</em>. You will
+        see the thumbnail, title and channel so you can check it is the right video.</li>
+      <li><strong>Choose your format.</strong> MP4 keeps the picture; MP3 keeps only the sound.
+        Then pick a resolution or a bitrate.</li>
+      <li><strong>Press Download.</strong> A progress bar shows the transfer, then the file saves
+        to your device on its own. If your browser blocks the automatic save, press
+        <em>Save again</em>.</li>
+    </ol>
+
+    <h2 id="desktop">On Windows and Mac</h2>
+    <p>Any modern browser works — Chrome, Edge, Firefox, Safari, Brave, Opera. The file lands in
+      your usual downloads folder:</p>
+    <ul class="ticks">
+      <li><strong>Windows:</strong> <code>C:\Users\YourName\Downloads</code></li>
+      <li><strong>macOS:</strong> <code>/Users/YourName/Downloads</code></li>
+    </ul>
+    <p>If Chrome asks "Keep or discard?", choose <em>Keep</em>. That prompt appears for any file
+      type the browser cannot preview, and it is not a warning about the file itself. To change
+      where files go, open your browser settings and look for <em>Downloads → Location</em>.</p>
+
+    <h2 id="mobile">On Android and iPhone</h2>
+    <h3>Android</h3>
+    <ol>
+      <li>Open this site in Chrome, Samsung Internet or Firefox.</li>
+      <li>Paste the link and download as usual.</li>
+      <li>The file appears in <em>Downloads</em>, and videos usually show up in your Gallery
+        within a minute.</li>
+    </ol>
+    <h3>iPhone and iPad</h3>
+    <ol>
+      <li>Open this site in Safari.</li>
+      <li>Download the file. Safari shows a blue arrow in the address bar when it finishes.</li>
+      <li>Tap that arrow, then the file, to open it in the <em>Files</em> app under
+        <em>On My iPhone → Downloads</em>.</li>
+      <li>To move a video into your camera roll, open it in Files, tap <em>Share</em>, then
+        <em>Save Video</em>.</li>
+    </ol>
+    <p>Older iOS versions handle browser downloads poorly. If nothing happens on tap, update iOS
+      or try the same link on a computer.</p>
+
+    <h2 id="mp3">Saving audio as MP3</h2>
+    <p>Switch the format dropdown from <em>MP4 video</em> to <em>MP3 audio</em>, then pick a
+      bitrate — 192&nbsp;kbps suits most music, 128&nbsp;kbps is plenty for speech. The
+      <a href="/youtube-to-mp3">MP3 page</a> explains the trade-offs and what tags get written
+      into the file.</p>
+
+    <h2 id="shorts">Downloading Shorts</h2>
+    <p>Shorts work exactly like normal videos. Copy the <code>youtube.com/shorts/…</code> link and
+      paste it in — see the <a href="/youtube-shorts-downloader">Shorts downloader</a> for
+      details about resolution and watermarks.</p>
+
+    <h2 id="problems">When a download fails</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>What you see</th><th>What it means</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>“That doesn't look like a YouTube video link”</td><td>The text pasted is not a
+            video URL</td><td>Copy the link again from the Share menu</td></tr>
+          <tr><td>“This video is private”</td><td>The uploader restricted it</td><td>Nothing can be
+            done — private videos are never accessible</td></tr>
+          <tr><td>“Video unavailable”</td><td>Deleted, or blocked in this region</td><td>Check the
+            video still plays on YouTube</td></tr>
+          <tr><td>“Too many requests”</td><td>YouTube is rate-limiting the server</td><td>Wait a
+            minute or two and try again</td></tr>
+          <tr><td>Download stops partway</td><td>Connection dropped</td><td>Start it again; nothing
+            is charged or wasted</td></tr>
+          <tr><td>Stuck on “Preparing file”</td><td>A large 4K video is being merged</td><td>Give
+            it a moment — big files take longer after the transfer finishes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Still stuck? <a href="/contact">Send us the link</a> and describe what happened — that is
+      usually enough for us to reproduce it.</p>
+
+    <p class="note">Download only content you own or have permission to save. See the
+      <a href="/disclaimer">disclaimer</a>.</p>
+  </div>
+</section>
+{% endblock %}

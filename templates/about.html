@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> About Us</nav>
+    <h1>About AK YouTube Downloader</h1>
+    <p class="lede">A small, independent tool built because most YouTube downloaders are covered
+      in fake buttons and pop-ups. This one is not.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow prose">
+    <h2>What we set out to build</h2>
+    <p>Anyone who has searched for a YouTube downloader knows the pattern: five buttons that say
+      Download, four of which install something you did not want, and a file that turns out to be
+      360p no matter what you selected. We wanted the opposite — one input, honest quality
+      options, and a file that is exactly what it claims to be.</p>
+
+    <h2>How it works under the hood</h2>
+    <p>There is no secret sauce, and we are happy to say what the tool is made of:</p>
+    <ul class="ticks">
+      <li><strong>yt-dlp</strong> — the open source project that reads what formats a video
+        actually offers and fetches them. It is maintained publicly and updated constantly as
+        YouTube changes.</li>
+      <li><strong>FFmpeg</strong> — merges the separate video and audio streams into one MP4, or
+        extracts and encodes audio into MP3, without re-encoding the picture.</li>
+      <li><strong>FastAPI and Python</strong> — the small web service that ties the two together
+        and streams progress to your browser.</li>
+    </ul>
+    <p>No YouTube Data API key is involved, which is why there are no quotas to run out of and no
+      cost to pass on to you.</p>
+
+    <h2>What we do not do</h2>
+    <ul class="ticks">
+      <li>We do not host, mirror or republish anyone's videos.</li>
+      <li>We do not require an account, so we hold no personal profile of you.</li>
+      <li>We do not bundle installers, toolbars or "download managers".</li>
+      <li>We do not open pop-ups or redirect you to another site mid-download.</li>
+    </ul>
+
+    <h2>Our position on copyright</h2>
+    <p>The tool is neutral technology — the same one used by researchers archiving public lectures
+      and creators backing up their own uploads. Using it to redistribute someone else's work is
+      not something we support, and it may be unlawful where you live. The
+      <a href="/disclaimer">disclaimer</a> and
+      <a href="/terms-and-conditions">terms &amp; conditions</a> spell this out.</p>
+
+    <h2>Get in touch</h2>
+    <p>Bug reports, feature ideas and rights-holder enquiries all go to the same place:
+      the <a href="/contact">contact page</a>, or <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+  </div>
+</section>
+{% endblock %}

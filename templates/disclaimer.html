@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> Disclaimer</nav>
+    <h1>Disclaimer</h1>
+    <p class="lede">What AK YouTube Downloader is, what it is not, and where our responsibility
+      ends and yours begins.</p>
+    <p class="updated">Last updated: {{ year }}</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow prose legal">
+    <h2>No affiliation with YouTube or Google</h2>
+    <p>AK YouTube Downloader is an independent project. It is not affiliated with, endorsed by,
+      sponsored by or connected to YouTube, Google LLC, Alphabet Inc. or any of their subsidiaries.
+      "YouTube" is a trademark of Google LLC and is used here only to describe what the tool does.</p>
+
+    <h2>We do not host any content</h2>
+    <p>No videos, audio files or thumbnails are stored, catalogued or republished by us. When you
+      submit a link, the media is fetched at that moment, converted, delivered to you and then
+      removed from the server.</p>
+
+    <h2>Copyright is your responsibility</h2>
+    <p>Most content on YouTube is protected by copyright. Downloading it without the owner's
+      permission may be unlawful where you live and may breach YouTube's Terms of Service. This
+      tool is intended for:</p>
+    <ul class="ticks">
+      <li>content you created and uploaded yourself;</li>
+      <li>content published under a licence that permits reuse, such as Creative Commons;</li>
+      <li>content in the public domain;</li>
+      <li>content you have explicit permission from the rights holder to download;</li>
+      <li>uses that qualify as fair use or fair dealing in your jurisdiction.</li>
+    </ul>
+    <p>We do not monitor what individual visitors download, and we accept no responsibility for
+      choices made by users of the service.</p>
+
+    <h2>No warranty</h2>
+    <p>The service is provided "as is", without warranty of any kind. We do not guarantee that
+      every video will download, that a particular resolution will be available, that files will
+      be free of defects, or that the service will be uninterrupted.</p>
+
+    <h2>External links</h2>
+    <p>Pages on this site may link to other websites for reference. We do not control those sites
+      and are not responsible for their content, policies or practices.</p>
+
+    <h2>Not legal advice</h2>
+    <p>Nothing on this website is legal advice. If you are unsure whether a particular download is
+      permitted in your country, consult a qualified lawyer.</p>
+
+    <h2>Rights holders</h2>
+    <p>If you are a rights holder with a concern about how this service is being used, please
+      <a href="/contact">contact us</a>. Because we host nothing, there is no file for us to
+      remove — but we will respond to genuine enquiries.</p>
+
+    <p class="note">See also the <a href="/terms-and-conditions">terms &amp; conditions</a> and the
+      <a href="/privacy-policy">privacy policy</a>.</p>
+  </div>
+</section>
+{% endblock %}

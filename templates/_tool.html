@@ -1,0 +1,58 @@
+<section class="tool" id="tool" data-mode="{{ tool_mode | default('video') }}">
+  <form class="tool-bar" id="toolForm" autocomplete="off">
+    <label class="sr-only" for="url">YouTube video link</label>
+    <input id="url" name="url" type="url" inputmode="url" spellcheck="false"
+           placeholder="Paste a YouTube link" required>
+    <button class="btn" id="getBtn" type="submit">Get video</button>
+  </form>
+  <p class="tool-hint" id="toolHint">Works with youtube.com, youtu.be, Shorts and YouTube Music links.</p>
+  <p class="tool-error" id="toolError" hidden></p>
+
+  <div class="tool-card" id="toolCard" hidden>
+    <div class="tool-video">
+      <div class="tool-thumb"><img id="thumb" alt="" width="160" height="90"></div>
+      <div class="tool-meta">
+        <h3 id="vTitle"></h3>
+        <p id="vMeta"></p>
+      </div>
+    </div>
+
+    <div class="tool-options" id="toolOptions">
+      <div class="opt">
+        <label for="kind">Format</label>
+        <select id="kind">
+          <option value="video">MP4 video</option>
+          <option value="audio">MP3 audio</option>
+        </select>
+      </div>
+      <div class="opt">
+        <label for="quality" id="qualityLabel">Quality</label>
+        <select id="quality"></select>
+      </div>
+      <button class="btn btn-lg" id="startBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>
+        <span id="startLabel">Download</span>
+      </button>
+    </div>
+
+    <div class="tool-state" id="toolState" hidden>
+      <div class="state-head">
+        <span class="state-text" id="stateText">Starting…</span>
+        <button class="link-btn" id="cancelBtn" type="button">Cancel</button>
+      </div>
+      <div class="track" id="track"><i id="bar"></i></div>
+      <p class="state-sub" id="stateSub"></p>
+    </div>
+
+    <div class="tool-done" id="toolDone" hidden>
+      <div class="done-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 12.5l5.5 5.5L20 7"/></svg>
+      </div>
+      <div class="done-text">
+        <strong id="doneName">File ready</strong>
+        <span id="doneSub">Saving to your device…</span>
+      </div>
+      <a class="btn btn-sm" id="saveAgain" href="#" download>Save again</a>
+    </div>
+  </div>
+</section>

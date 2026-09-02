@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ak-youtube-downloader
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: SITE_NAME
+        value: AK YouTube Downloader
+      - key: SITE_URL
+        value: https://ak-youtube-downloader.onrender.com
+      - key: CONTACT_EMAIL
+        value: support@akyoutubedownloader.com
+      - key: MAX_WORKERS
+        value: "2"
+      - key: RETENTION_MINUTES
+        value: "30"
+      - key: NO_BROWSER
+        value: "1"

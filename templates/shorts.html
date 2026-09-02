@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block schema %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+ {"@type":"ListItem","position":1,"name":"Home","item":"{{ site_url }}/"},
+ {"@type":"ListItem","position":2,"name":"YouTube Shorts Downloader","item":"{{ canonical }}"}]}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> Shorts Downloader</nav>
+    <h1>YouTube Shorts Downloader</h1>
+    <p class="lede">Save Shorts in their original vertical resolution as an MP4 — no watermark
+      stamped across the frame, no re-encoding, no app to install.</p>
+    {% include "_tool.html" %}
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow prose">
+    <h2>How to copy a Shorts link</h2>
+    <ol>
+      <li><strong>In the YouTube app:</strong> open the Short, tap <em>Share</em>, then
+        <em>Copy link</em>.</li>
+      <li><strong>In a browser:</strong> copy the address, which looks like
+        <code>youtube.com/shorts/XXXXXXXXXXX</code>.</li>
+      <li>Paste it above and press <em>Get video</em>.</li>
+    </ol>
+    <p>Extra tracking text after the link, like <code>?si=…</code>, is harmless — you can paste
+      the whole thing.</p>
+
+    <h2>What you get</h2>
+    <ul class="ticks">
+      <li>The original vertical file, usually 1080 × 1920, exactly as uploaded</li>
+      <li>Original audio, including licensed music tracks that play in the Short</li>
+      <li>A plain MP4 that any phone gallery or editor can open</li>
+    </ul>
+
+    <h2>About watermarks</h2>
+    <p>YouTube does not burn a watermark into Shorts the way some other platforms do, so the file
+      you get is clean. If a creator has added their own handle or logo inside the video, that is
+      part of the footage itself and cannot be removed by any downloader.</p>
+
+    <h2>Want only the sound?</h2>
+    <p>Switch the format dropdown to MP3, or open the
+      <a href="/youtube-to-mp3">YouTube to MP3 converter</a>.</p>
+
+    <p class="note">Reposting someone else's Short as your own can breach copyright and platform
+      rules. Please read the <a href="/disclaimer">disclaimer</a>.</p>
+  </div>
+</section>
+{% endblock %}

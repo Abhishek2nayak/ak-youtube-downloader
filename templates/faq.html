@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block schema %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{% for f in faqs %}{"@type":"Question","name":{{ f.q | tojson }},
+ "acceptedAnswer":{"@type":"Answer","text":{{ f.a | tojson }}}}{{ "," if not loop.last }}
+{% endfor %}]}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>/</span> FAQ</nav>
+    <h1>Frequently Asked Questions</h1>
+    <p class="lede">Formats, quality, mobile support, failed downloads, privacy and the legal
+      side — answered plainly. If something is missing, <a href="/contact">ask us</a>.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow prose">
+    {% for group, items in faq_groups %}
+      <h2 id="{{ group | lower | replace(' ', '-') }}">{{ group }}</h2>
+      <div class="qa">
+        {% for f in items %}
+          <details{% if loop.first and group == 'Getting started' %} open{% endif %}>
+            <summary>{{ f.q }}</summary>
+            <p>{{ f.a }}</p>
+          </details>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    <h2>Still need help?</h2>
+    <p>The <a href="/how-to-download">step-by-step guide</a> covers each device in detail, and the
+      <a href="/contact">contact page</a> reaches us directly. Include the video link and the exact
+      message you saw — it saves a round trip.</p>
+  </div>
+</section>
+{% endblock %}

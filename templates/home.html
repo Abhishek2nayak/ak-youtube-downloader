@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block schema %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication",
+ "name":"{{ site_name }}","applicationCategory":"MultimediaApplication",
+ "operatingSystem":"Web browser, Windows, macOS, Linux, Android, iOS",
+ "url":"{{ site_url }}/","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+ "description":{{ description | tojson }}}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Free · No signup · No software to install</p>
+    <h1>Download YouTube videos in MP4 or MP3</h1>
+    <p class="lede">Paste a link, choose a quality, and the file saves straight to your device.
+      AK YouTube Downloader supports resolutions up to 4K and 320&nbsp;kbps audio, and it works the
+      same on a phone, a tablet or a desktop browser.</p>
+
+    {% include "_tool.html" %}
+
+    <ul class="trust">
+      <li>Up to 4K / 2160p</li>
+      <li>MP3 with cover art</li>
+      <li>Shorts supported</li>
+      <li>No watermarks</li>
+    </ul>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Three steps, about thirty seconds</h2>
+    <div class="steps">
+      <article class="step">
+        <span class="num">1</span>
+        <h3>Copy the video link</h3>
+        <p>On YouTube, tap <em>Share</em> then <em>Copy link</em>. On a desktop browser, copy the
+          address from the URL bar. Shorts and YouTube Music links work too.</p>
+      </article>
+      <article class="step">
+        <span class="num">2</span>
+        <h3>Paste it and press Get video</h3>
+        <p>We read the video's public details and show you the title, channel and every
+          resolution that video actually offers — no guessing.</p>
+      </article>
+      <article class="step">
+        <span class="num">3</span>
+        <h3>Pick a format and download</h3>
+        <p>Choose MP4 or MP3, press Download, and the finished file is sent to your device
+          automatically as soon as it is ready.</p>
+      </article>
+    </div>
+    <p class="band-more"><a href="/how-to-download">Read the full step-by-step guide →</a></p>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap">
+    <h2>What you can download</h2>
+    <div class="cards">
+      <article class="card">
+        <h3><a href="/youtube-downloader">YouTube videos in MP4</a></h3>
+        <p>Save any public video in 360p, 480p, 720p, 1080p, 1440p or 2160p, depending on what
+          the uploader published. Video and audio are merged into one clean MP4 that plays in
+          any player, on any device.</p>
+      </article>
+      <article class="card">
+        <h3><a href="/youtube-to-mp3">YouTube to MP3</a></h3>
+        <p>Pull just the audio at 128, 192, 256 or 320&nbsp;kbps. The thumbnail is embedded as cover
+          art and the title and channel are written into the file's tags, so your music player
+          shows the track properly.</p>
+      </article>
+      <article class="card">
+        <h3><a href="/youtube-shorts-downloader">YouTube Shorts</a></h3>
+        <p>Shorts links download exactly like normal videos — full vertical resolution, original
+          audio, no watermark burned into the frame.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap narrow">
+    <h2>Why people use AK YouTube Downloader</h2>
+    <div class="feature-list">
+      <div><h3>Real quality options</h3><p>Most sites show a fixed list of resolutions and then
+        hand you a re-encoded 360p file. We read the formats YouTube actually serves for that
+        specific video and offer only those, so 1080p means 1080p.</p></div>
+      <div><h3>Nothing to install</h3><p>It runs in your browser. No extension, no desktop app,
+        no APK, and nothing that asks for permissions it does not need.</p></div>
+      <div><h3>No account, no email</h3><p>You never sign up. We do not ask who you are and we do
+        not build a profile of what you download.</p></div>
+      <div><h3>Files are not kept</h3><p>Your file is prepared, sent to you, and removed from the
+        server. See the <a href="/privacy-policy">privacy policy</a> for exactly what is stored.</p></div>
+      <div><h3>Works on mobile</h3><p>Android saves straight to your Downloads folder. On iPhone
+        the file lands in Files or Photos depending on how you save it — the
+        <a href="/how-to-download#mobile">mobile guide</a> covers both.</p></div>
+      <div><h3>Open source underneath</h3><p>The heavy lifting is done by yt-dlp and FFmpeg, two
+        well-known open source projects, so the download logic is public and auditable.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap narrow">
+    <h2>Common questions</h2>
+    <div class="qa">
+      <details open><summary>Is AK YouTube Downloader free?</summary>
+        <p>Yes. Every format and every resolution is free, with no daily cap and no paid tier.</p></details>
+      <details><summary>Do I need to install anything?</summary>
+        <p>No. The site does the work on the server and hands you the finished file through your
+          browser.</p></details>
+      <details><summary>What is the highest quality I can get?</summary>
+        <p>Whatever the uploader published — commonly 1080p, and up to 4K on channels that upload
+          at that resolution. Audio goes up to 320&nbsp;kbps.</p></details>
+      <details><summary>Can I download private or paid videos?</summary>
+        <p>No. Only public videos can be processed. Private, members-only, purchased and
+          age-locked videos are refused.</p></details>
+    </div>
+    <p class="band-more"><a href="/faq">See all frequently asked questions →</a></p>
+  </div>
+</section>
+
+<section class="cta-strip">
+  <div class="wrap">
+    <h2>Ready to save a video?</h2>
+    <p>Paste your link and pick a format. It takes about half a minute.</p>
+    <a class="btn btn-lg" href="/youtube-downloader">Open the downloader</a>
+  </div>
+</section>
+{% endblock %}
