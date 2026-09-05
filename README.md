@@ -94,7 +94,8 @@ See `.env.example`.
 | `MAX_WORKERS` | 3 | Downloads processed in parallel |
 | `RETENTION_MINUTES` | 0 | Delete prepared files after N minutes. **Use 15–60 in production**, 0 locally |
 | `DOWNLOAD_DIR` | ./downloads | Where files are prepared |
-| `PROXY` | *(empty)* | Route YouTube requests through a proxy if the host IP gets rate-limited |
+| `PROXY` | *(empty)* | Route YouTube requests through a proxy if the host IP gets rate-limited. `http://`, `https://`, `socks5://` or `socks5h://`, with optional `user:pass@` |
+| `RATE_LIMIT` | *(empty)* | Global download speed cap, e.g. `5M` |
 | `NO_BROWSER` | — | Set to `1` on a server so it does not try to open a browser |
 
 ---
@@ -232,6 +233,43 @@ git push -u origin main
 downloaded media or private settings can be committed by accident.
 
 ---
+
+## Using a proxy
+
+Cloud hosting IPs are shared with bots, so YouTube often answers them with "sign in to confirm
+you're not a bot". Routing requests through a proxy - ideally a **residential** or **mobile** one -
+fixes it, because those IPs look like ordinary home connections. Running on your own PC or a VPS
+usually needs no proxy at all.
+
+Set one variable; no code change is needed:
+
+```
+PROXY=http://username:password@gate.provider.com:7000
+```
+
+Accepted schemes: `http://`, `https://`, `socks5://`, `socks5h://` (use `socks5h` so DNS is
+resolved by the proxy). Credentials are optional if the provider authorises by IP.
+
+| Host | How |
+|---|---|
+| Render | Dashboard -> service -> **Environment** -> Add Environment Variable -> Save |
+| Railway | Project -> service -> **Variables** -> New Variable |
+| Fly.io | `fly secrets set PROXY="http://user:pass@host:port"` |
+| Docker | `docker run -e PROXY="http://user:pass@host:port" ...` |
+| VPS + systemd | `Environment=PROXY=http://user:pass@host:port` in the unit, then daemon-reload and restart |
+| Windows (local) | `$env:PROXY="http://user:pass@host:port"` then `.\.venv\Scripts\python.exe app.py` |
+| macOS / Linux | `PROXY="http://user:pass@host:port" ./run.sh` |
+
+The value is read once at startup, so restart or redeploy after changing it. Environment variables
+override anything stored in `data/settings.json`.
+
+**Checking it works:** a wrong proxy fails immediately with "Unable to connect to proxy"; a working
+proxy that YouTube dislikes gives a YouTube error instead. That difference tells you which side is
+failing.
+
+**Choosing a provider:** datacenter proxies are cheap and usually just as blocked as your host's
+own IP. Residential or mobile pools (Webshare, IPRoyal, Bright Data, Smartproxy) are what actually
+work, typically a few dollars a month at small-site traffic.
 
 ## After you go live: SEO checklist
 

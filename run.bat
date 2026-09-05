@@ -24,6 +24,25 @@ if not defined PY (
 )
 
 echo Using Python: %PY%
+
+if not exist "requirements.txt" (
+  echo.
+  echo   Cannot find requirements.txt next to this file.
+  echo.
+  echo   You are probably running run.bat from INSIDE the ZIP file.
+  echo   Windows copies the .bat alone to a temp folder, so the rest of the
+  echo   project is missing.
+  echo.
+  echo   Fix: close this window, right-click the ZIP in File Explorer,
+  echo        choose "Extract All...", open the extracted folder,
+  echo        and run run.bat from there.
+  echo.
+  echo   Current folder: %CD%
+  echo.
+  pause
+  exit /b 1
+)
+
 if not exist ".venv\Scripts\python.exe" (
   echo Creating environment ^(one time^)...
   %PY% -m venv .venv

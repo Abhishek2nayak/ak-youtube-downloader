@@ -76,6 +76,17 @@ def save_json(path: Path, payload) -> None:
 
 
 SETTINGS: Dict[str, Any] = {**DEFAULT_SETTINGS, **load_json(SETTINGS_FILE, {})}
+
+# Environment variables win over anything saved in data/settings.json, so a proxy set
+# in your host's dashboard always takes effect on the next restart.
+for _key, _env in (("proxy", "PROXY"), ("download_dir", "DOWNLOAD_DIR")):
+    if os.environ.get(_env):
+        SETTINGS[_key] = os.environ[_env]
+if os.environ.get("MAX_WORKERS"):
+    SETTINGS["max_workers"] = int(os.environ["MAX_WORKERS"])
+if os.environ.get("RATE_LIMIT"):
+    SETTINGS["rate_limit"] = os.environ["RATE_LIMIT"]
+
 Path(SETTINGS["download_dir"]).mkdir(parents=True, exist_ok=True)
 
 

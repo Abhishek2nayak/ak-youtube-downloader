@@ -17,6 +17,13 @@ if [ -z "$PY" ]; then
   exit 1
 fi
 
+if [ ! -f "requirements.txt" ]; then
+  echo "Cannot find requirements.txt next to this script."
+  echo "Extract the archive fully, then run ./run.sh from inside the extracted folder."
+  echo "Current folder: $(pwd)"
+  exit 1
+fi
+
 if [ ! -x ".venv/bin/python" ]; then
   echo "Creating environment (one time)..."
   "$PY" -m venv .venv
