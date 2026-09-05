@@ -11,3 +11,4 @@ downloads/*
 .DS_Store
 cookies.txt
 *.cookies.txt
+cookies.runtime.txt

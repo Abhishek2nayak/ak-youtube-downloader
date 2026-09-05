@@ -53,7 +53,7 @@ RETENTION_MINUTES = int(os.environ.get("RETENTION_MINUTES", "0"))
 
 # Path to a Netscape-format cookies.txt exported from a browser signed in to YouTube.
 # This is what gets a server past "sign in to confirm you're not a bot".
-COOKIES_FILE = os.environ.get("COOKIES_FILE", "")
+COOKIES_FILE_SOURCE = os.environ.get("COOKIES_FILE", "")
 # YouTube serves a different API to each client. When one is blocked the next is tried.
 PLAYER_CLIENTS = [c.strip() for c in os.environ.get(
     "YTDLP_PLAYER_CLIENTS", "default,android_vr,web_safari,tv,mweb").split(",") if c.strip()]
@@ -95,6 +95,34 @@ if os.environ.get("RATE_LIMIT"):
     SETTINGS["rate_limit"] = os.environ["RATE_LIMIT"]
 
 Path(SETTINGS["download_dir"]).mkdir(parents=True, exist_ok=True)
+
+
+def prepare_cookies(source: str) -> str:
+    """
+    yt-dlp writes the cookie jar back when it finishes, so the file it is given must be
+    writable. Mounted secrets (Render Secret Files, Kubernetes secrets, read-only volumes)
+    are not, so work on a private copy instead of the original.
+    """
+    if not source:
+        return ""
+    if not os.path.isfile(source):
+        print(f"  [cookies] COOKIES_FILE is set but no file at {source}")
+        return ""
+    runtime = DATA_DIR / "cookies.runtime.txt"
+    try:
+        shutil.copyfile(source, runtime)
+        os.chmod(runtime, 0o600)
+        with open(runtime, "r", encoding="utf-8", errors="ignore") as fh:
+            first = fh.readline()
+        if "netscape" not in first.lower() and not first.startswith("#"):
+            print("  [cookies] warning: file does not look like a Netscape cookies.txt")
+        return str(runtime)
+    except Exception as exc:                                        # noqa: BLE001
+        print(f"  [cookies] could not copy {source}: {exc}")
+        return source
+
+
+COOKIES_FILE = prepare_cookies(COOKIES_FILE_SOURCE)
 
 
 def locate_ffmpeg() -> tuple[Optional[str], str]:
@@ -789,7 +817,7 @@ async def health() -> Dict[str, Any]:
     return {"ok": True, "ffmpeg": FFMPEG_AVAILABLE, "ffmpeg_source": FFMPEG_SOURCE,
             "ytdlp": yt_dlp.version.__version__,
             "cookies": bool(COOKIES_FILE and os.path.isfile(COOKIES_FILE)),
-            "cookies_path_set": bool(COOKIES_FILE),
+            "cookies_path_set": bool(COOKIES_FILE_SOURCE),
             "proxy": bool(SETTINGS.get("proxy")),
             "player_clients": PLAYER_CLIENTS}
 
