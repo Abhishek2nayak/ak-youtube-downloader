@@ -9,3 +9,5 @@ downloads/*
 !downloads/.gitkeep
 *.log
 .DS_Store
+cookies.txt
+*.cookies.txt

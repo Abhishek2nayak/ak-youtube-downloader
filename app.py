@@ -51,6 +51,13 @@ CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "support@akyoutubedownloader.com
 # Delete finished files after this many minutes (0 = keep forever, good for local use)
 RETENTION_MINUTES = int(os.environ.get("RETENTION_MINUTES", "0"))
 
+# Path to a Netscape-format cookies.txt exported from a browser signed in to YouTube.
+# This is what gets a server past "sign in to confirm you're not a bot".
+COOKIES_FILE = os.environ.get("COOKIES_FILE", "")
+# YouTube serves a different API to each client. When one is blocked the next is tried.
+PLAYER_CLIENTS = [c.strip() for c in os.environ.get(
+    "YTDLP_PLAYER_CLIENTS", "default,android_vr,web_safari,tv,mweb").split(",") if c.strip()]
+
 DEFAULT_SETTINGS = {
     "download_dir": os.environ.get("DOWNLOAD_DIR", str(BASE_DIR / "downloads")),
     "max_workers": int(os.environ.get("MAX_WORKERS", "3")),
@@ -191,15 +198,45 @@ def emit(job: Job) -> None:
 # yt-dlp
 # --------------------------------------------------------------------------- #
 
-def base_opts() -> Dict[str, Any]:
+def base_opts(client: Optional[str] = None) -> Dict[str, Any]:
     o: Dict[str, Any] = {"quiet": True, "no_warnings": True, "noplaylist": True}
     if SETTINGS.get("cookies_from_browser"):
         o["cookiesfrombrowser"] = (SETTINGS["cookies_from_browser"],)
+    if COOKIES_FILE and os.path.isfile(COOKIES_FILE):
+        o["cookiefile"] = COOKIES_FILE
     if SETTINGS.get("proxy"):
         o["proxy"] = SETTINGS["proxy"]
     if FFMPEG_DIR:
         o["ffmpeg_location"] = FFMPEG_DIR
+    if client and client != "default":
+        o["extractor_args"] = {"youtube": {"player_client": [client]}}
     return o
+
+
+def is_blocked_error(exc: Exception) -> bool:
+    """True when YouTube refused the server rather than the video being unavailable."""
+    low = str(exc).lower()
+    return any(t in low for t in (
+        "sign in to confirm", "not a bot", "confirm you\'re not", "failed to extract",
+        "player response", "unable to extract", "http error 403", "http error 429",
+        "requested format is not available", "no video formats",
+    ))
+
+
+def extract(url: str, download: bool, opts_for: Any) -> Dict[str, Any]:
+    """Run yt-dlp, retrying with other YouTube player clients when one is blocked."""
+    last: Optional[Exception] = None
+    for client in PLAYER_CLIENTS:
+        try:
+            with yt_dlp.YoutubeDL(opts_for(client)) as ydl:
+                return ydl.extract_info(url, download=download)
+        except Cancelled:
+            raise
+        except Exception as exc:                                    # noqa: BLE001
+            if not is_blocked_error(exc):
+                raise
+            last = exc
+    raise last if last else RuntimeError("Extraction failed")
 
 
 def format_selector(mode: str, quality: str) -> str:
@@ -210,12 +247,12 @@ def format_selector(mode: str, quality: str) -> str:
             f"bestvideo{hf}+bestaudio/best{hf}/best")
 
 
-def build_ydl_opts(job: Job) -> Dict[str, Any]:
+def build_ydl_opts(job: Job, client: Optional[str] = None) -> Dict[str, Any]:
     o = job.opts
     out_dir = Path(SETTINGS["download_dir"])
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    ydl = base_opts()
+    ydl = base_opts(client)
     ydl.update({
         "format": format_selector(o.get("mode", "video"), str(o.get("quality", "best"))),
         "outtmpl": {"default": str(out_dir / "%(title).120B [%(id)s].%(ext)s")},
@@ -316,14 +353,13 @@ def run_job(job: Job) -> None:
         job.stage = "Starting"
         emit(job)
 
-        with yt_dlp.YoutubeDL(build_ydl_opts(job)) as ydl:
-            info = ydl.extract_info(job.url, download=True)
-            if info.get("_type") == "playlist" and info.get("entries"):
-                info = [e for e in info["entries"] if e][0]
-            job.title = info.get("title") or job.title
-            job.thumbnail = info.get("thumbnail") or job.thumbnail
-            job.uploader = info.get("uploader") or job.uploader
-            path = resolve_output(info)
+        info = extract(job.url, True, lambda c: build_ydl_opts(job, c))
+        if info.get("_type") == "playlist" and info.get("entries"):
+            info = [e for e in info["entries"] if e][0]
+        job.title = info.get("title") or job.title
+        job.thumbnail = info.get("thumbnail") or job.thumbnail
+        job.uploader = info.get("uploader") or job.uploader
+        path = resolve_output(info)
 
         if job.cancel:
             raise Cancelled()
@@ -367,8 +403,9 @@ def friendly_error(msg: str) -> str:
     if "incomplete youtube id" in low or "unsupported url" in low or "is not a valid url" in low:
         return "That doesn't look like a YouTube video link. Copy the link straight from YouTube."
     if "sign in to confirm" in low or ("bot" in low and "confirm" in low):
-        return ("YouTube asked this server to sign in. Try again in a minute, or use the "
-                "cookies option in Settings if you are running this locally.")
+        return ("YouTube is blocking this server (bot check). The server needs a "
+                "cookies.txt from a signed-in YouTube session, or a residential proxy. "
+                "See the README section 'When YouTube blocks your server'.")
     if "private video" in low:
         return "This video is private, so it cannot be downloaded."
     if "video unavailable" in low or "removed" in low:
@@ -750,7 +787,11 @@ async def sitemap() -> Response:
 @app.get("/api/health")
 async def health() -> Dict[str, Any]:
     return {"ok": True, "ffmpeg": FFMPEG_AVAILABLE, "ffmpeg_source": FFMPEG_SOURCE,
-            "ytdlp": yt_dlp.version.__version__}
+            "ytdlp": yt_dlp.version.__version__,
+            "cookies": bool(COOKIES_FILE and os.path.isfile(COOKIES_FILE)),
+            "cookies_path_set": bool(COOKIES_FILE),
+            "proxy": bool(SETTINGS.get("proxy")),
+            "player_clients": PLAYER_CLIENTS}
 
 
 @app.post("/api/info")
@@ -768,10 +809,12 @@ async def info(req: InfoRequest) -> JSONResponse:
 
 
 def probe(url: str) -> Dict[str, Any]:
-    opts = base_opts()
-    opts["skip_download"] = True
-    with yt_dlp.YoutubeDL(opts) as ydl:
-        v = ydl.extract_info(url, download=False)
+    def opts_for(client: Optional[str]) -> Dict[str, Any]:
+        o = base_opts(client)
+        o["skip_download"] = True
+        return o
+
+    v = extract(url, False, opts_for)
     if v.get("_type") == "playlist" and v.get("entries"):
         v = [e for e in v["entries"] if e][0]
     heights = sorted({f.get("height") for f in (v.get("formats") or [])
