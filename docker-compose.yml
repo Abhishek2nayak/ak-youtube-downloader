@@ -1,0 +1,30 @@
+# Runs the site together with a PO token provider, which is what token-gated
+# YouTube clients (web, web_safari, mweb) need on a flagged server IP.
+#   docker compose up -d
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      SITE_URL: ${SITE_URL:-http://localhost:8000}
+      RETENTION_MINUTES: "30"
+      MAX_WORKERS: "2"
+      NO_BROWSER: "1"
+      POT_BASE_URL: http://pot:4416
+      YTDLP_PLAYER_CLIENTS: android_vr,tv,web_embedded,web_safari,default
+      # COOKIES_FILE: /app/secrets/cookies.txt
+      # PROXY: http://user:pass@host:port
+      # DEBUG_KEY: change-me
+    # volumes:
+    #   - ./cookies.txt:/app/secrets/cookies.txt:ro
+    depends_on:
+      - pot
+    restart: unless-stopped
+
+  pot:
+    image: brainicism/bgutil-ytdlp-pot-provider
+    init: true
+    expose:
+      - "4416"
+    restart: unless-stopped

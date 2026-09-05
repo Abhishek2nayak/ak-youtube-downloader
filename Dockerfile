@@ -13,7 +13,8 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt \
+ && pip install -U bgutil-ytdlp-pot-provider
 
 COPY . .
 RUN mkdir -p downloads data

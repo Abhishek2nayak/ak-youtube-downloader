@@ -96,6 +96,10 @@ See `.env.example`.
 | `DOWNLOAD_DIR` | ./downloads | Where files are prepared |
 | `PROXY` | *(empty)* | Route YouTube requests through a proxy if the host IP gets rate-limited. `http://`, `https://`, `socks5://` or `socks5h://`, with optional `user:pass@` |
 | `RATE_LIMIT` | *(empty)* | Global download speed cap, e.g. `5M` |
+| `COOKIES_FILE` | *(empty)* | Path to a `cookies.txt` from a signed-in YouTube session — the main fix for the bot check |
+| `YTDLP_PLAYER_CLIENTS` | default,android_vr,web_safari,tv,mweb | Which YouTube clients to try, in order |
+| `POT_BASE_URL` | *(empty)* | URL of a bgutil PO-token provider, e.g. `http://127.0.0.1:4416` |
+| `DEBUG_KEY` | *(empty)* | Enables `/api/diagnose?key=…&url=…`. Leave empty in normal operation |
 | `NO_BROWSER` | — | Set to `1` on a server so it does not try to open a browser |
 
 ---
@@ -237,9 +241,8 @@ downloaded media or private settings can be committed by accident.
 ## Using a proxy
 
 Cloud hosting IPs are shared with bots, so YouTube often answers them with "sign in to confirm
-you're not a bot". Routing requests through a proxy - ideally a **residential** or **mobile** one -
-fixes it, because those IPs look like ordinary home connections. Running on your own PC or a VPS
-usually needs no proxy at all.
+you're not a bot". Routing requests through a proxy — ideally a **residential** or **mobile** one —
+fixes it, because those IPs look like ordinary home connections.
 
 Set one variable; no code change is needed:
 
@@ -248,28 +251,151 @@ PROXY=http://username:password@gate.provider.com:7000
 ```
 
 Accepted schemes: `http://`, `https://`, `socks5://`, `socks5h://` (use `socks5h` so DNS is
-resolved by the proxy). Credentials are optional if the provider authorises by IP.
+resolved by the proxy). Credentials are optional if the provider authorises by IP instead.
+
+**Where to set it**
 
 | Host | How |
 |---|---|
-| Render | Dashboard -> service -> **Environment** -> Add Environment Variable -> Save |
-| Railway | Project -> service -> **Variables** -> New Variable |
+| Render | Dashboard → your service → **Environment** → Add Environment Variable → Save (redeploys automatically) |
+| Railway | Project → service → **Variables** → New Variable |
 | Fly.io | `fly secrets set PROXY="http://user:pass@host:port"` |
 | Docker | `docker run -e PROXY="http://user:pass@host:port" ...` |
-| VPS + systemd | `Environment=PROXY=http://user:pass@host:port` in the unit, then daemon-reload and restart |
-| Windows (local) | `$env:PROXY="http://user:pass@host:port"` then `.\.venv\Scripts\python.exe app.py` |
-| macOS / Linux | `PROXY="http://user:pass@host:port" ./run.sh` |
+| VPS + systemd | Add `Environment=PROXY=http://user:pass@host:port` to the unit, then `systemctl daemon-reload && systemctl restart akytd` |
+| Windows (local test) | `$env:PROXY="http://user:pass@host:port"` then `.\.venv\Scripts\python.exe app.py` |
+| macOS / Linux (local) | `PROXY="http://user:pass@host:port" ./run.sh` |
 
 The value is read once at startup, so restart or redeploy after changing it. Environment variables
 override anything stored in `data/settings.json`.
 
-**Checking it works:** a wrong proxy fails immediately with "Unable to connect to proxy"; a working
-proxy that YouTube dislikes gives a YouTube error instead. That difference tells you which side is
-failing.
+**Checking it works:** open `/api/health` (the service should still report `ok`), then try a
+download. If the proxy is wrong you get an immediate "Unable to connect to proxy" error rather
+than a YouTube error — that difference tells you which side is failing.
 
-**Choosing a provider:** datacenter proxies are cheap and usually just as blocked as your host's
-own IP. Residential or mobile pools (Webshare, IPRoyal, Bright Data, Smartproxy) are what actually
-work, typically a few dollars a month at small-site traffic.
+**Choosing a provider:** datacenter proxies are cheap but usually just as blocked as your host's
+own IP. Residential or mobile pools (Webshare, IPRoyal, Bright Data, Smartproxy and similar) are
+what actually work, typically a few dollars a month for the traffic a small site uses. Rotate on
+each request if your provider offers it.
+
+## When YouTube blocks your server
+
+The most common production failure is this message:
+
+> YouTube is blocking this server (bot check)
+
+Nothing is wrong with the code — the same link works on your PC. YouTube treats requests from
+datacentre IP ranges (Render, Railway, Fly, AWS, every free host) as bots, because those ranges are
+full of scrapers. Your home IP is trusted; a shared cloud IP is not.
+
+Three fixes, cheapest first.
+
+### 1. cookies.txt from a signed-in account (free, works immediately)
+
+Give the server a logged-in YouTube session and the bot check goes away.
+
+1. Create a **throwaway Google account** — never use your main one. Cookies grant full access to
+   that account and Google may flag it for unusual activity.
+2. Install the browser extension **"Get cookies.txt LOCALLY"** (Chrome or Firefox).
+3. Open a **private/incognito window**, sign in to youtube.com with the throwaway account, open any
+   video, then click the extension and export cookies for `youtube.com`. You get a `cookies.txt`.
+4. Do **not** log out in that window — just close it. Logging out invalidates the cookies.
+5. Put the file on the server and point `COOKIES_FILE` at it:
+
+| Host | How |
+|---|---|
+| Render | Service → **Environment** → *Secret Files* → Add, filename `cookies.txt`, paste contents. Then set `COOKIES_FILE=/etc/secrets/cookies.txt` |
+| Railway | Variables → add the file through a volume, or commit it to a private repo and set the path |
+| Docker / VPS | Copy the file next to `app.py` and set `COOKIES_FILE=/app/cookies.txt` |
+
+Never commit `cookies.txt` to a public repo — anyone who reads it is signed in as that account.
+`.gitignore` already excludes it.
+
+**Read-only secrets are handled for you.** Render Secret Files (and Kubernetes secrets, and any
+read-only volume) cannot be written to, but yt-dlp saves the cookie jar back when it finishes — so
+pointing it straight at `/etc/secrets/cookies.txt` fails with
+`[Errno 30] Read-only file system`. The app copies the file to `data/cookies.runtime.txt` at
+startup and uses that copy, so the mounted secret stays untouched. Update the secret and restart
+to pick up new cookies.
+
+Cookies expire, typically in a few weeks, and faster if the account is used from a very different
+location than the server. Re-export when downloads start failing again.
+
+### 2. Residential proxy (paid, most reliable)
+
+Set `PROXY` (see the previous section). Residential and mobile IPs look like ordinary home
+connections, so the bot check does not trigger. Combining a proxy with cookies is the setup most
+production downloaders actually run.
+
+### 3. A VPS instead of a PaaS
+
+A $4–6/month VPS from Hetzner, Contabo, DigitalOcean or Oracle Cloud's always-free tier often just
+works, because those IPs are less abused than free PaaS ranges. Cheaper than a proxy plan, and you
+get real bandwidth.
+
+### Also built in
+
+- **Player-client fallback.** YouTube exposes a different API to each client (web, android_vr,
+  tv, mweb). If one is refused, the app automatically retries with the next. Override the order
+  with `YTDLP_PLAYER_CLIENTS=default,android_vr,tv`.
+- **Fresh yt-dlp.** Extraction breaks whenever YouTube changes something and yt-dlp patches it
+  within days. Redeploy monthly — that reinstalls the latest version.
+- Check `/api/health` to confirm what the server has: `"cookies": true` means the cookie file was
+  found, `"proxy": true` means a proxy is configured.
+
+### Diagnosing it properly
+
+Guessing wastes time. Set `DEBUG_KEY` to any random string, redeploy, then open:
+
+```
+https://your-app.onrender.com/api/diagnose?key=YOUR_KEY&url=https://www.youtube.com/watch?v=VIDEO_ID
+```
+
+It tries every player client against that video and returns, per client, either the formats it
+found or the raw error — plus the server's outbound IP, whether the cookie file loaded and how
+many YouTube cookie lines it contains. It takes up to a minute because each attempt is a real
+request. Unset `DEBUG_KEY` when you are done; the endpoint is off whenever it is empty.
+
+### Player clients and PO tokens
+
+Per the [yt-dlp PO Token Guide](https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide), YouTube now
+requires a **proof-of-origin token** from most clients on flagged IPs. The ones that still work
+without a token:
+
+| Client | Needs PO token? | Notes |
+|---|---|---|
+| `android_vr` | No | Best first choice on a server |
+| `web_embedded` | No | Only videos the uploader allows to be embedded |
+| `tv` | No | Needs account cookies, otherwise every format comes back DRM-protected |
+| `web`, `web_safari` | Yes (streaming + subtitles) | |
+| `mweb`, `android`, `ios`, `tv_simply` | Yes | `android`/`ios` also ignore cookies |
+
+The default order is therefore `android_vr,tv,web_embedded,default`. Override with
+`YTDLP_PLAYER_CLIENTS`.
+
+### Running a PO token provider
+
+If the clients above are exhausted, run the bgutil provider next to the app and the token-gated
+clients start working:
+
+```bash
+docker run --name bgutil-provider -d --init -p 4416:4416 brainicism/bgutil-ytdlp-pot-provider
+pip install -U bgutil-ytdlp-pot-provider     # the yt-dlp plugin that talks to it
+```
+
+Then set `POT_BASE_URL=http://127.0.0.1:4416` (or the provider's URL) and add
+`web_safari` back into `YTDLP_PLAYER_CLIENTS`.
+
+`docker-compose.yml` in this repo runs both containers together — `docker compose up -d`.
+
+### The honest summary
+
+On a free PaaS, cookies alone often are not enough any more: the IP is flagged before the cookies
+are even read, and using cookies from a flagged IP can get that Google account restricted. The
+setups that actually stay up are, in order of reliability:
+
+1. **VPS with a clean IP** (₹400–600 / $5 a month) + cookies — simplest thing that keeps working.
+2. **Residential proxy** + cookies — works from any host, costs a few dollars a month.
+3. **PO token provider** + cookies — helps, but does not fix a badly flagged IP on its own.
 
 ## After you go live: SEO checklist
 

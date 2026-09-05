@@ -54,9 +54,18 @@ RETENTION_MINUTES = int(os.environ.get("RETENTION_MINUTES", "0"))
 # Path to a Netscape-format cookies.txt exported from a browser signed in to YouTube.
 # This is what gets a server past "sign in to confirm you're not a bot".
 COOKIES_FILE_SOURCE = os.environ.get("COOKIES_FILE", "")
-# YouTube serves a different API to each client. When one is blocked the next is tried.
+# YouTube serves a different API to each client, and on a datacentre IP most of them now
+# demand a PO token. Per the yt-dlp PO Token Guide the ones that work without a token are
+# android_vr, web_embedded and tv (tv needs account cookies or every format comes back DRM'd),
+# so those are tried first and the token-hungry ones last.
 PLAYER_CLIENTS = [c.strip() for c in os.environ.get(
-    "YTDLP_PLAYER_CLIENTS", "default,android_vr,web_safari,tv,mweb").split(",") if c.strip()]
+    "YTDLP_PLAYER_CLIENTS", "android_vr,tv,web_embedded,default").split(",") if c.strip()]
+
+# Optional PO token provider (bgutil). Run the provider container, then set this to its URL,
+# e.g. http://127.0.0.1:4416 . Without it, web/mweb/android/ios clients cannot stream.
+POT_BASE_URL = os.environ.get("POT_BASE_URL", "").rstrip("/")
+# Protects /api/diagnose. Leave unset to disable the endpoint entirely.
+DEBUG_KEY = os.environ.get("DEBUG_KEY", "")
 
 DEFAULT_SETTINGS = {
     "download_dir": os.environ.get("DOWNLOAD_DIR", str(BASE_DIR / "downloads")),
@@ -236,8 +245,13 @@ def base_opts(client: Optional[str] = None) -> Dict[str, Any]:
         o["proxy"] = SETTINGS["proxy"]
     if FFMPEG_DIR:
         o["ffmpeg_location"] = FFMPEG_DIR
+    extractor_args: Dict[str, Any] = {}
     if client and client != "default":
-        o["extractor_args"] = {"youtube": {"player_client": [client]}}
+        extractor_args["youtube"] = {"player_client": [client]}
+    if POT_BASE_URL:
+        extractor_args["youtubepot-bgutilhttp"] = {"base_url": [POT_BASE_URL]}
+    if extractor_args:
+        o["extractor_args"] = extractor_args
     return o
 
 
@@ -245,14 +259,20 @@ def is_blocked_error(exc: Exception) -> bool:
     """True when YouTube refused the server rather than the video being unavailable."""
     low = str(exc).lower()
     return any(t in low for t in (
-        "sign in to confirm", "not a bot", "confirm you\'re not", "failed to extract",
+        "sign in to confirm", "not a bot", "confirm you're not", "failed to extract",
         "player response", "unable to extract", "http error 403", "http error 429",
         "requested format is not available", "no video formats",
     ))
 
 
 def extract(url: str, download: bool, opts_for: Any) -> Dict[str, Any]:
-    """Run yt-dlp, retrying with other YouTube player clients when one is blocked."""
+    """
+    Run yt-dlp, retrying with different YouTube player clients when the first one is
+    blocked. YouTube serves each client a different API surface, so a client that is
+    refused on a datacentre IP often succeeds on the next one.
+
+    `opts_for(client)` must return a fresh options dict for that client.
+    """
     last: Optional[Exception] = None
     for client in PLAYER_CLIENTS:
         try:
@@ -819,7 +839,9 @@ async def health() -> Dict[str, Any]:
             "cookies": bool(COOKIES_FILE and os.path.isfile(COOKIES_FILE)),
             "cookies_path_set": bool(COOKIES_FILE_SOURCE),
             "proxy": bool(SETTINGS.get("proxy")),
-            "player_clients": PLAYER_CLIENTS}
+            "player_clients": PLAYER_CLIENTS,
+            "pot_provider": bool(POT_BASE_URL),
+            "diagnose": bool(DEBUG_KEY)}
 
 
 @app.post("/api/info")
@@ -964,6 +986,65 @@ async def contact(req: ContactRequest) -> Dict[str, Any]:
                     "at": datetime.now(timezone.utc).isoformat()})
     save_json(MESSAGES_FILE, msgs[:500])
     return {"ok": True}
+
+
+@app.get("/api/diagnose")
+async def diagnose(url: str, key: str = "") -> Dict[str, Any]:
+    """
+    Try every player client on one URL and report the raw error each gives.
+    Disabled unless DEBUG_KEY is set; call as /api/diagnose?key=...&url=...
+    Takes up to a minute because it really contacts YouTube once per client.
+    """
+    if not DEBUG_KEY or key != DEBUG_KEY:
+        raise HTTPException(403, "Diagnostics are disabled. Set DEBUG_KEY and pass ?key=")
+
+    def run() -> Dict[str, Any]:
+        out: Dict[str, Any] = {
+            "ytdlp": yt_dlp.version.__version__,
+            "cookies_env": COOKIES_FILE_SOURCE or None,
+            "cookies_loaded": bool(COOKIES_FILE and os.path.isfile(COOKIES_FILE)),
+            "cookie_lines": None,
+            "proxy": SETTINGS.get("proxy") or None,
+            "pot_provider": POT_BASE_URL or None,
+            "outbound_ip": None,
+            "attempts": [],
+        }
+        if out["cookies_loaded"]:
+            try:
+                with open(COOKIES_FILE, "r", encoding="utf-8", errors="ignore") as fh:
+                    lines = [ln for ln in fh if "youtube" in ln.lower()]
+                out["cookie_lines"] = len(lines)
+            except Exception:
+                pass
+        try:
+            import urllib.request
+            out["outbound_ip"] = urllib.request.urlopen(
+                "https://api.ipify.org", timeout=8).read().decode()[:40]
+        except Exception as exc:                                    # noqa: BLE001
+            out["outbound_ip"] = f"unknown ({exc})"
+
+        for client in PLAYER_CLIENTS:
+            entry: Dict[str, Any] = {"client": client}
+            started = time.time()
+            try:
+                o = base_opts(client)
+                o["skip_download"] = True
+                with yt_dlp.YoutubeDL(o) as ydl:
+                    info = ydl.extract_info(url, download=False)
+                fmts = info.get("formats") or []
+                entry["ok"] = True
+                entry["formats"] = len(fmts)
+                entry["heights"] = sorted({f.get("height") for f in fmts
+                                           if f.get("height")}, reverse=True)[:6]
+                entry["title"] = (info.get("title") or "")[:80]
+            except Exception as exc:                                # noqa: BLE001
+                entry["ok"] = False
+                entry["error"] = re.sub(r"\s+", " ", str(exc))[:400]
+            entry["seconds"] = round(time.time() - started, 1)
+            out["attempts"].append(entry)
+        return out
+
+    return await asyncio.get_running_loop().run_in_executor(None, run)
 
 
 @app.websocket("/ws")
